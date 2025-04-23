@@ -5,18 +5,30 @@ async function generateAndDisplay(type, containerId) {
   const menu = document.getElementById("menu").value;
   const additionalInfo = document.getElementById("additionalInfo").value;
 
-  const response = await fetch("/api/generate", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ type, clientName, eventDate, location, menu, additionalInfo })
-  });
-
-  const data = await response.json();
   const outputEl = document.getElementById(containerId);
-  outputEl.innerHTML = `
-    <pre>${data.result}</pre>
-    <button onclick="copyToClipboard('${containerId}')">Copy to Clipboard</button>
-  `;
+  outputEl.innerHTML = "<em>Generating...</em>";
+
+  try {
+    const response = await fetch("/api/generate", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ type, clientName, eventDate, location, menu, additionalInfo })
+    });
+
+    if (!response.ok) {
+      throw new Error("API call failed");
+    }
+
+    const data = await response.json();
+    outputEl.innerHTML = `
+      <pre>${data.result}</pre>
+      <button onclick="copyToClipboard('${containerId}')">Copy to Clipboard</button>
+      <button onclick="downloadText('${type}', \`${data.result}\`)">Download as .txt</button>
+    `;
+  } catch (err) {
+    outputEl.innerHTML = "<span style='color:red;'>Failed to generate post. Please check your inputs and try again.</span>";
+    console.error(err);
+  }
 }
 
 function generatePrompts() {
@@ -30,4 +42,12 @@ function copyToClipboard(containerId) {
   navigator.clipboard.writeText(content).then(() => {
     alert("Copied to clipboard!");
   });
+}
+
+function downloadText(type, content) {
+  const blob = new Blob([content], { type: 'text/plain' });
+  const link = document.createElement("a");
+  link.href = URL.createObjectURL(blob);
+  link.download = `${type}_post.txt`;
+  link.click();
 }
