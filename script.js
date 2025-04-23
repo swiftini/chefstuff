@@ -47,13 +47,19 @@ async function generateAndDisplay(type, containerId) {
     if (!response.ok) throw new Error("API call failed");
 
     const data = await response.json();
-    const resultParts = data.result.split("\n");
-    const title = resultParts[0].replace(/^#+\s*/, "").trim();
-    const content = resultParts.slice(1).join("\n");
+    let formattedOutput = data.result;
+
+    if (type === "blog") {
+      const lines = data.result.split("\n").filter(line => line.trim() !== "");
+      const title = lines[0].replace(/^#+\s*/, "").trim();
+      const body = lines.slice(1).join("\n").trim();
+      formattedOutput = `<div class="blog-title">${title}</div><pre>${body}</pre>`;
+    } else {
+      formattedOutput = `<pre>${data.result}</pre>`;
+    }
 
     outputEl.innerHTML = `
-      ${type === "blog" ? `<div class="blog-title">${title}</div>` : ""}
-      <pre>${type === "blog" ? content : data.result}</pre>
+      ${formattedOutput}
       <button onclick="copyToClipboard('${containerId}')">Copy to Clipboard</button>
       <button onclick="downloadText('${type}', \`${data.result}\`)">Download as .txt</button>
     `;
