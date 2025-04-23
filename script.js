@@ -1,9 +1,11 @@
 async function generateAndDisplay(type, containerId) {
-  const clientName = document.getElementById("clientName").value;
-  const eventDate = document.getElementById("eventDate").value;
-  const location = document.getElementById("location").value;
-  const menu = document.getElementById("menu").value;
-  const additionalInfo = document.getElementById("additionalInfo").value;
+  const clientName = document.getElementById("clientName").value.trim();
+  const eventDate = document.getElementById("eventDate").value.trim();
+  const location = document.getElementById("location").value.trim();
+  const menu = document.getElementById("menu").value.trim();
+  const additionalInfo = document.getElementById("additionalInfo").value.trim();
+  const industry = document.getElementById("industry").value;
+  const eventType = document.getElementById("eventType").value;
 
   const outputEl = document.getElementById(containerId);
   outputEl.innerHTML = "<em>Generating...</em>";
@@ -12,12 +14,10 @@ async function generateAndDisplay(type, containerId) {
     const response = await fetch("/api/generate", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ type, clientName, eventDate, location, menu, additionalInfo })
+      body: JSON.stringify({ type, clientName, eventDate, location, menu, additionalInfo, industry, eventType })
     });
 
-    if (!response.ok) {
-      throw new Error("API call failed");
-    }
+    if (!response.ok) throw new Error("API call failed");
 
     const data = await response.json();
     outputEl.innerHTML = `
@@ -26,8 +26,8 @@ async function generateAndDisplay(type, containerId) {
       <button onclick="downloadText('${type}', \`${data.result}\`)">Download as .txt</button>
     `;
   } catch (err) {
-    outputEl.innerHTML = "<span style='color:red;'>Failed to generate post. Please check your inputs and try again.</span>";
     console.error(err);
+    outputEl.innerHTML = "<span style='color:red;'>Failed to generate post. Please check your inputs and try again.</span>";
   }
 }
 
