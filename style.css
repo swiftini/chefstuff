@@ -31,6 +31,7 @@ input, textarea, select {
   box-sizing: border-box;
   background: #fff;
   margin-bottom: 10px;
+  min-height: 48px;
 }
 
 input:invalid, textarea:invalid, select:invalid {

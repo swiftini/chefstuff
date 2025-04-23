@@ -1,38 +1,59 @@
 export default async function handler(req, res) {
   try {
-    const { type, clientName, eventDate, location, menu, additionalInfo, industry, eventType } = req.body;
+    const {
+      type, clientName, eventDate, location,
+      menu, additionalInfo, industry, eventType, keywords
+    } = req.body;
 
     if (!type || !clientName || !eventDate || !location || !menu) {
       return res.status(400).json({ error: "Missing required fields" });
     }
 
-    const typeSuffix = eventType && eventType.toLowerCase() !== "none" && eventType.toLowerCase() !== "other"
+    const keywordList = keywords
+      ? keywords.split(',').map(k => k.trim()).filter(k => k)
+      : [];
+
+    const keywordTextBlog = keywordList.length
+      ? `The following keywords should be naturally bolded in the blog post: ${keywordList.map(k => `**${k}**`).join(', ')}.`
+      : '';
+
+    const keywordTextFB = keywordList.length
+      ? `Include the following keywords in the Facebook post: ${keywordList.join(', ')}.`
+      : '';
+
+    const keywordTextIG = keywordList.length
+      ? `Include these as hashtags: ${keywordList.map(k => '#' + k.replace(/\s+/g, '')).join(' ')}`
+      : '';
+
+    const typeSuffix = eventType && eventType.toLowerCase() !== "none"
       ? ` It was a ${eventType.toLowerCase()}.`
       : "";
 
-    const industryLine = industry && industry.toLowerCase() !== "none" && industry.toLowerCase() !== "other"
+    const industryLine = industry && industry.toLowerCase() !== "none"
       ? ` This was part of a ${industry.toLowerCase()} engagement.`
       : "";
 
     const templates = {
-      blog: `# ${eventType && eventType !== "none" && eventType !== "other" ? eventType + " for " : ""}${clientName} in ${location}
+      blog: `# ${eventType && eventType !== "none" ? eventType + " for " : ""}${clientName} in ${location}
 
 Write a blog post recapping a private chef event that has already occurred for ${clientName} on ${eventDate} in ${location}.
 ${industryLine}${typeSuffix}
 The menu included: ${menu}.
 Additional context: ${additionalInfo}.
-Do not mention future bookings, do not make up any guest details. Do not include names or professions. The tone should be elegant and descriptive.
-Make the post a minimum of 300 words, structured in 5–7 paragraphs.`,
+${keywordTextBlog}
+Do not mention future bookings, do not make up any guest details. Do not include names or professions.
+The tone should be elegant and descriptive. Make the post a minimum of 300 words, structured in at least 8 paragraphs.`,
 
       instagram: `Write an Instagram caption recapping a private chef event on ${eventDate} in ${location} for ${clientName}.
 The menu featured: ${menu}.
 Event details: ${additionalInfo}.${typeSuffix}${industryLine}
-Speak in the past tense. Avoid offering bookings or calls to action. Use elegant emojis and hashtags.`,
+Speak in the past tense. Avoid offering bookings or calls to action. Use elegant emojis. ${keywordTextIG}`,
 
       facebook: `Write a Facebook post summarizing a private chef event that took place for ${clientName} on ${eventDate} in ${location}.
 The food included: ${menu}.
 Event info: ${additionalInfo}.${typeSuffix}${industryLine}
-Keep the tone warm, but do not include a call to book, or imaginary guest commentary. Speak in the past tense.`
+${keywordTextFB}
+Keep the tone warm, but do not include a call to book or imaginary guest commentary. Speak in the past tense.`
     };
 
     const prompt = templates[type];
