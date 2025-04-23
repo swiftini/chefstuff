@@ -13,16 +13,16 @@ export default async function handler(req, res) {
       ? keywords.split(',').map(k => k.trim()).filter(k => k)
       : [];
 
-    const keywordTextBlog = keywordList.length
-      ? `The following keywords should be naturally bolded in the blog post: ${keywordList.map(k => `**${k}**`).join(', ')}.`
+    const keywordBlogInstruction = keywordList.length
+      ? `Each of the following keywords must be included at least once in the blog content. When they appear, make sure they are surrounded with double asterisks (**) to display them in bold: ${keywordList.join(', ')}.`
       : '';
 
-    const keywordTextFB = keywordList.length
-      ? `Include the following keywords in the Facebook post: ${keywordList.join(', ')}.`
+    const keywordFBInstruction = keywordList.length
+      ? `Include all of the following keywords at least once in the Facebook post: ${keywordList.join(', ')}.`
       : '';
 
-    const keywordTextIG = keywordList.length
-      ? `Include these as hashtags: ${keywordList.map(k => '#' + k.replace(/\s+/g, '')).join(' ')}`
+    const keywordIGInstruction = keywordList.length
+      ? `Convert the following keywords into hashtags and include them at the end of the Instagram caption: ${keywordList.join(', ')}.`
       : '';
 
     const typeSuffix = eventType && eventType.toLowerCase() !== "none"
@@ -40,20 +40,20 @@ Write a blog post recapping a private chef event that has already occurred for $
 ${industryLine}${typeSuffix}
 The menu included: ${menu}.
 Additional context: ${additionalInfo}.
-${keywordTextBlog}
-Do not mention future bookings, do not make up any guest details. Do not include names or professions.
-The tone should be elegant and descriptive. Make the post a minimum of 300 words, structured in at least 8 paragraphs.`,
+${keywordBlogInstruction}
+Do not mention future bookings. Do not make up any guest details. Do not include names or professions.
+Make the post elegant, detailed, and structured in at least 8 paragraphs.`,
 
       instagram: `Write an Instagram caption recapping a private chef event on ${eventDate} in ${location} for ${clientName}.
 The menu featured: ${menu}.
 Event details: ${additionalInfo}.${typeSuffix}${industryLine}
-Speak in the past tense. Avoid offering bookings or calls to action. Use elegant emojis. ${keywordTextIG}`,
+Avoid offering bookings or calls to action. Use elegant emojis. Speak in the past tense. ${keywordIGInstruction}`,
 
       facebook: `Write a Facebook post summarizing a private chef event that took place for ${clientName} on ${eventDate} in ${location}.
 The food included: ${menu}.
 Event info: ${additionalInfo}.${typeSuffix}${industryLine}
-${keywordTextFB}
-Keep the tone warm, but do not include a call to book or imaginary guest commentary. Speak in the past tense.`
+${keywordFBInstruction}
+Keep the tone warm, friendly, and descriptive. Do not include a call to book or fictional guest commentary.`
     };
 
     const prompt = templates[type];
