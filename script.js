@@ -1,15 +1,33 @@
-function generatePrompts() {
+async function generateAndDisplay(type, containerId) {
   const clientName = document.getElementById("clientName").value;
   const eventDate = document.getElementById("eventDate").value;
   const location = document.getElementById("location").value;
   const menu = document.getElementById("menu").value;
   const additionalInfo = document.getElementById("additionalInfo").value;
 
-  const blog = `Write a blog post about a private chef dinner for ${clientName} on ${eventDate} in ${location}. Menu: ${menu}. Additional info: ${additionalInfo}. Make it elegant, story-driven, and sensory.`;
-  const insta = `Write an Instagram caption for a private chef event on ${eventDate} for ${clientName} in ${location}. Menu: ${menu}. Details: ${additionalInfo}. Add a friendly tone, emojis, and 5 hashtags.`;
-  const facebook = `Write a Facebook post for a private chef experience with ${clientName} on ${eventDate} at ${location}. Menu included: ${menu}. Notes: ${additionalInfo}. Tone should be warm and community-friendly.`;
+  const response = await fetch("/api/generate", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ type, clientName, eventDate, location, menu, additionalInfo })
+  });
 
-  document.getElementById("blogPrompt").textContent = blog;
-  document.getElementById("igPrompt").textContent = insta;
-  document.getElementById("fbPrompt").textContent = facebook;
+  const data = await response.json();
+  const outputEl = document.getElementById(containerId);
+  outputEl.innerHTML = `
+    <pre>${data.result}</pre>
+    <button onclick="copyToClipboard('${containerId}')">Copy to Clipboard</button>
+  `;
+}
+
+function generatePrompts() {
+  generateAndDisplay("blog", "blogPrompt");
+  generateAndDisplay("instagram", "igPrompt");
+  generateAndDisplay("facebook", "fbPrompt");
+}
+
+function copyToClipboard(containerId) {
+  const content = document.querySelector(`#${containerId} pre`).innerText;
+  navigator.clipboard.writeText(content).then(() => {
+    alert("Copied to clipboard!");
+  });
 }
