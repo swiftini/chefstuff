@@ -50,10 +50,11 @@ async function generateAndDisplay(type, containerId) {
     let formattedOutput = data.result;
 
     if (type === "blog") {
-      const lines = data.result.split("\n").filter(line => line.trim() !== "");
-      const title = lines[0].replace(/^#+\s*/, "").trim();
-      const body = lines.slice(1).join("\n").trim();
-      formattedOutput = `<div class="blog-title">${title}</div><pre>${body}</pre>`;
+      const paragraphs = data.result.split(/\n\n+/).map(p => p.trim()).filter(p => p.length > 0);
+      const rawTitle = paragraphs[0].replace(/^#+\s*/, "").split(/[.?!]/)[0].trim();  // Get just the first sentence fragment
+      const bodyParagraphs = paragraphs.slice(1).map(p => `<p>${p}</p>`).join("\n");
+
+      formattedOutput = `<div class="blog-title">${rawTitle}</div>${bodyParagraphs}`;
     } else {
       formattedOutput = `<pre>${data.result}</pre>`;
     }
@@ -76,7 +77,7 @@ function generatePrompts() {
 }
 
 function copyToClipboard(containerId) {
-  const content = document.querySelector(`#${containerId} pre`).innerText;
+  const content = document.querySelector(`#${containerId} pre`)?.innerText || document.querySelector(`#${containerId}`).innerText;
   navigator.clipboard.writeText(content).then(() => {
     alert("Copied to clipboard!");
   });
