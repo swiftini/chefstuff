@@ -1,26 +1,59 @@
 export default async function handler(req, res) {
   try {
-    const { type, clientName, eventDate, location, menu, additionalInfo } = req.body;
+    const {
+      type, clientName, eventDate, location,
+      menu, additionalInfo, industry, eventType, keywords
+    } = req.body;
 
     if (!type || !clientName || !eventDate || !location || !menu) {
       return res.status(400).json({ error: "Missing required fields" });
     }
 
+    const keywordList = keywords
+      ? keywords.split(',').map(k => k.trim()).filter(k => k)
+      : [];
+
+    const keywordBlogInstruction = keywordList.length
+      ? `If generating a blog post, make sure every keyword below appears at least once and is used naturally: ${keywordList.join(', ')}.`
+      : '';
+
+    const keywordFBInstruction = keywordList.length
+      ? `Include all of the following keywords at least once in the Facebook post: ${keywordList.join(', ')}.`
+      : '';
+
+    const keywordIGInstruction = keywordList.length
+      ? `Convert the following keywords into hashtags and include them at the end of the Instagram caption: ${keywordList.join(', ')}.`
+      : '';
+
+    const typeSuffix = eventType && eventType.toLowerCase() !== "none"
+      ? ` It was a ${eventType.toLowerCase()} event.`
+      : "";
+
+    const industryLine = industry && industry.toLowerCase() !== "none"
+      ? ` This was part of a ${industry.toLowerCase()} engagement.`
+      : "";
+
     const templates = {
-      blog: `Write a blog post about a private chef dinner for ${clientName} on ${eventDate} in ${location}.
+      blog: `# ${eventType && eventType !== "none" ? eventType + " for " : ""}${clientName} in ${location}
+
+Write a blog post recapping a private chef event that has already occurred for ${clientName} on ${eventDate} in ${location}.
+${industryLine}${typeSuffix}
 The menu included: ${menu}.
 Additional context: ${additionalInfo}.
-Make it elegant, story-driven, and descriptive.`,
+${keywordBlogInstruction}
+Avoid discussing future bookings or guest personal details.
+The post must be a minimum of 1000 words, elegant in tone, and structured in 8 or more distinct paragraphs.`,
 
-      instagram: `Write an Instagram caption for a private chef event on ${eventDate} in ${location} for ${clientName}.
-Highlight the menu: ${menu}.
-Details: ${additionalInfo}.
-Use emojis and hashtags. Keep it warm, short, and elegant.`,
+      instagram: `Write an Instagram caption recapping a private chef event on ${eventDate} in ${location} for ${clientName}.
+The menu featured: ${menu}.
+Event details: ${additionalInfo}.${typeSuffix}${industryLine}
+Avoid offering bookings or calls to action. Use elegant emojis. Speak in the past tense. ${keywordIGInstruction}`,
 
-      facebook: `Write a Facebook post for a private chef dinner with ${clientName} on ${eventDate} in ${location}.
-The menu included: ${menu}.
-Details: ${additionalInfo}.
-Make it community-friendly and inviting with a call to action to book.`
+      facebook: `Write a Facebook post summarizing a private chef event that took place for ${clientName} on ${eventDate} in ${location}.
+The food included: ${menu}.
+Event info: ${additionalInfo}.${typeSuffix}${industryLine}
+${keywordFBInstruction}
+Do not include a call to book or fictional guest commentary. Speak in the past tense.`
     };
 
     const prompt = templates[type];
