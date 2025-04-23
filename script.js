@@ -1,4 +1,32 @@
+function validateFields() {
+  const fields = ["clientName", "eventDate", "location", "menu"];
+  let valid = true;
+  fields.forEach(id => {
+    const el = document.getElementById(id);
+    if (!el.value.trim()) {
+      el.style.border = "2px solid red";
+      valid = false;
+    } else {
+      el.style.border = "1px solid #ccc";
+    }
+  });
+  return valid;
+}
+
+["clientName", "eventDate", "location", "menu"].forEach(id => {
+  document.getElementById(id).addEventListener("input", () => {
+    validateFields();
+  });
+});
+
 async function generateAndDisplay(type, containerId) {
+  const isValid = validateFields();
+  const outputEl = document.getElementById(containerId);
+  if (!isValid) {
+    outputEl.innerHTML = "<span style='color:red;'>Please fill out all required fields marked with an asterisk (*).</span>";
+    return;
+  }
+
   const clientName = document.getElementById("clientName").value.trim();
   const eventDate = document.getElementById("eventDate").value.trim();
   const location = document.getElementById("location").value.trim();
@@ -6,14 +34,6 @@ async function generateAndDisplay(type, containerId) {
   const additionalInfo = document.getElementById("additionalInfo").value.trim();
   const industry = document.getElementById("industry").value;
   const eventType = document.getElementById("eventType").value;
-
-  const outputEl = document.getElementById(containerId);
-
-  // Simple validation
-  if (!clientName || !eventDate || !location || !menu) {
-    outputEl.innerHTML = "<span style='color:red;'>Please fill out all required fields: Client Name, Event Date, Location, and Menu.</span>";
-    return;
-  }
 
   outputEl.innerHTML = "<em>Generating...</em>";
 
@@ -27,8 +47,13 @@ async function generateAndDisplay(type, containerId) {
     if (!response.ok) throw new Error("API call failed");
 
     const data = await response.json();
+    const resultParts = data.result.split("\n");
+    const title = resultParts[0].replace(/^#+\s*/, "").trim();
+    const content = resultParts.slice(1).join("\n");
+
     outputEl.innerHTML = `
-      <pre>${data.result}</pre>
+      ${type === "blog" ? `<div class="blog-title">${title}</div>` : ""}
+      <pre>${type === "blog" ? content : data.result}</pre>
       <button onclick="copyToClipboard('${containerId}')">Copy to Clipboard</button>
       <button onclick="downloadText('${type}', \`${data.result}\`)">Download as .txt</button>
     `;
@@ -39,9 +64,9 @@ async function generateAndDisplay(type, containerId) {
 }
 
 function generatePrompts() {
-  generateAndDisplay("blog", "blogPrompt");
-  generateAndDisplay("instagram", "igPrompt");
-  generateAndDisplay("facebook", "fbPrompt");
+  generateAndDisplay("blog", "blogOutput");
+  generateAndDisplay("instagram", "igOutput");
+  generateAndDisplay("facebook", "fbOutput");
 }
 
 function copyToClipboard(containerId) {
