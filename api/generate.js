@@ -14,11 +14,14 @@ export default async function handler(req, res) {
       : [];
 
     const keywordBlogInstruction = keywordList.length
-      ? `Each of the following keywords must be included at least once in the blog content. When they appear, make sure they are surrounded with double asterisks (**) to display them in bold: ${keywordList.join(', ')}.`
+      ? `The following keywords must each appear at least once in the blog post: ${keywordList.join(', ')}.
+Use them naturally in the content. When used, surround each keyword with double asterisks (**) for bold formatting.
+Do not skip any keywords.`
       : '';
 
     const keywordFBInstruction = keywordList.length
-      ? `Include all of the following keywords at least once in the Facebook post: ${keywordList.join(', ')}.`
+      ? `The following keywords must each appear at least once in the Facebook post: ${keywordList.join(', ')}.
+Use them naturally within the content.`
       : '';
 
     const keywordIGInstruction = keywordList.length
@@ -41,8 +44,8 @@ ${industryLine}${typeSuffix}
 The menu included: ${menu}.
 Additional context: ${additionalInfo}.
 ${keywordBlogInstruction}
-Do not mention future bookings. Do not make up any guest details. Do not include names or professions.
-Make the post elegant, detailed, and structured in at least 8 paragraphs.`,
+Avoid discussing future bookings or guest personal details.
+Structure the post in at least 8 descriptive paragraphs.`,
 
       instagram: `Write an Instagram caption recapping a private chef event on ${eventDate} in ${location} for ${clientName}.
 The menu featured: ${menu}.
@@ -53,7 +56,7 @@ Avoid offering bookings or calls to action. Use elegant emojis. Speak in the pas
 The food included: ${menu}.
 Event info: ${additionalInfo}.${typeSuffix}${industryLine}
 ${keywordFBInstruction}
-Keep the tone warm, friendly, and descriptive. Do not include a call to book or fictional guest commentary.`
+Do not include a call to book or fictional guest commentary. Speak in the past tense.`
     };
 
     const prompt = templates[type];
