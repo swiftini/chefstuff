@@ -14,14 +14,11 @@ export default async function handler(req, res) {
       : [];
 
     const keywordBlogInstruction = keywordList.length
-      ? `The following keywords must each appear at least once in the blog post: ${keywordList.join(', ')}.
-Use them naturally in the content. When used, surround each keyword with double asterisks (**) for bold formatting.
-Do not skip any keywords.`
+      ? `If generating a blog post, make sure every keyword below appears at least once and is used naturally: ${keywordList.join(', ')}.`
       : '';
 
     const keywordFBInstruction = keywordList.length
-      ? `The following keywords must each appear at least once in the Facebook post: ${keywordList.join(', ')}.
-Use them naturally within the content.`
+      ? `Include all of the following keywords at least once in the Facebook post: ${keywordList.join(', ')}.`
       : '';
 
     const keywordIGInstruction = keywordList.length
@@ -29,7 +26,7 @@ Use them naturally within the content.`
       : '';
 
     const typeSuffix = eventType && eventType.toLowerCase() !== "none"
-      ? ` It was a ${eventType.toLowerCase()}.`
+      ? ` It was a ${eventType.toLowerCase()} event.`
       : "";
 
     const industryLine = industry && industry.toLowerCase() !== "none"
@@ -45,7 +42,7 @@ The menu included: ${menu}.
 Additional context: ${additionalInfo}.
 ${keywordBlogInstruction}
 Avoid discussing future bookings or guest personal details.
-Structure the post in at least 8 descriptive paragraphs.`,
+The post must be a minimum of 1000 words, elegant in tone, and structured in 8 or more distinct paragraphs.`,
 
       instagram: `Write an Instagram caption recapping a private chef event on ${eventDate} in ${location} for ${clientName}.
 The menu featured: ${menu}.

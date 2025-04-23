@@ -77,11 +77,23 @@ async function generateAndDisplay(type, containerId) {
       content = appendMissingHashtags(content, keywordList);
     }
 
-    outputEl.innerHTML = `
-      <pre>${content}</pre>
-      <button onclick="copyToClipboard('${containerId}')">Copy to Clipboard</button>
-      <button onclick="downloadText('${type}', \`${content}\`)">Download as .txt</button>
-    `;
+    if (type === "blog") {
+      const lines = content.split("\n").filter(l => l.trim());
+      const title = lines[0].replace(/^#+\s*/, "").trim();
+      const body = lines.slice(1).join("\n\n");
+      outputEl.innerHTML = `
+        <div class="blog-title">${title}</div>
+        <pre>${body}</pre>
+        <button onclick="copyToClipboard('${containerId}')">Copy to Clipboard</button>
+        <button onclick="downloadText('${type}', \`${content}\`)">Download as .txt</button>
+      `;
+    } else {
+      outputEl.innerHTML = `
+        <pre>${content}</pre>
+        <button onclick="copyToClipboard('${containerId}')">Copy to Clipboard</button>
+        <button onclick="downloadText('${type}', \`${content}\`)">Download as .txt</button>
+      `;
+    }
   } catch (err) {
     console.error(err);
     outputEl.innerHTML = "<span style='color:red;'>Failed to generate post. Please try again or check your input.</span>";
