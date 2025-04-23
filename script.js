@@ -19,6 +19,32 @@ function validateFields() {
   });
 });
 
+function ensureKeywordsInOutput(type, content, keywords) {
+  let updated = content;
+  const missing = [];
+
+  keywords.forEach(keyword => {
+    const regex = new RegExp(`\b${keyword}\b`, 'i');
+    if (!regex.test(content)) {
+      missing.push(keyword);
+    }
+  });
+
+  if (missing.length === 0) return content;
+
+  if (type === "blog") {
+    missing.forEach(k => {
+      updated += `\n\nA notable element of the event was the **${k}** experience.`;
+    });
+  } else if (type === "facebook") {
+    updated += `\n\nThe experience included: ${missing.join(', ')}.`;
+  } else if (type === "instagram") {
+    updated += `\n\n${missing.map(k => "#" + k.replace(/\s+/g, '')).join(' ')}`;
+  }
+
+  return updated;
+}
+
 async function generateAndDisplay(type, containerId) {
   const isValid = validateFields();
   const outputEl = document.getElementById(containerId);
@@ -34,6 +60,8 @@ async function generateAndDisplay(type, containerId) {
   const additionalInfo = document.getElementById("additionalInfo").value.trim();
   const industry = document.getElementById("industry").value;
   const eventType = document.getElementById("eventType").value;
+  const keywordInput = document.getElementById("keywords").value;
+  const keywordList = keywordInput.split(',').map(k => k.trim()).filter(k => k.length > 0);
 
   outputEl.innerHTML = "<em>Generating...</em>";
 
@@ -41,28 +69,33 @@ async function generateAndDisplay(type, containerId) {
     const response = await fetch("/api/generate", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ type, clientName, eventDate, location, menu, additionalInfo, industry, eventType })
+      body: JSON.stringify({
+        type, clientName, eventDate, location, menu,
+        additionalInfo, industry, eventType, keywords: keywordInput
+      })
     });
 
     if (!response.ok) throw new Error("API call failed");
 
     const data = await response.json();
-    let formattedOutput = data.result;
+    let content = data.result;
+    content = ensureKeywordsInOutput(type, content, keywordList);
+
+    let formattedOutput = "";
 
     if (type === "blog") {
-      const paragraphs = data.result.split(/\n\n+/).map(p => p.trim()).filter(p => p.length > 0);
-      const rawTitle = paragraphs[0].replace(/^#+\s*/, "").split(/[.?!]/)[0].trim();  // Get just the first sentence fragment
-      const bodyParagraphs = paragraphs.slice(1).map(p => `<p>${p}</p>`).join("\n");
-
-      formattedOutput = `<div class="blog-title">${rawTitle}</div>${bodyParagraphs}`;
+      const lines = content.split("\n").filter(l => l.trim());
+      const title = lines[0].replace(/^#+\s*/, "").split(/[.?!]/)[0].trim();
+      const body = lines.slice(1).map(p => `<p>${p}</p>`).join("\n");
+      formattedOutput = `<div class="blog-title">${title}</div>${body}`;
     } else {
-      formattedOutput = `<pre>${data.result}</pre>`;
+      formattedOutput = `<pre>${content}</pre>`;
     }
 
     outputEl.innerHTML = `
       ${formattedOutput}
       <button onclick="copyToClipboard('${containerId}')">Copy to Clipboard</button>
-      <button onclick="downloadText('${type}', \`${data.result}\`)">Download as .txt</button>
+      <button onclick="downloadText('${type}', \`${content}\`)">Download as .txt</button>
     `;
   } catch (err) {
     console.error(err);
