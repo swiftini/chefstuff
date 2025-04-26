@@ -1,54 +1,95 @@
-body {
-  background-color: #fff3e6;
-  font-family: "Segoe UI", sans-serif;
+
+body, html {
   margin: 0;
-  padding: 20px;
+  padding: 0;
+  height: 100%;
+  font-family: Arial, sans-serif;
+  background: #f7f7f7;
 }
 
-h1, h2 {
-  color: #333;
-  text-align: center;
+.auth-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
 }
 
-form, .output-block, #upgrade-section {
-  max-width: 600px;
-  margin: 20px auto;
-  background: #ffffffcc;
-  padding: 20px;
-  border-radius: 12px;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.05);
-}
-
-input, select, textarea, button {
-  width: 100%;
-  padding: 12px;
-  margin-top: 10px;
-  margin-bottom: 15px;
+.auth-container > div {
+  background: white;
+  padding: 2rem;
   border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+  max-width: 400px;
+  width: 100%;
+}
+
+.auth-container h2 {
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+.auth-container input {
+  display: block;
+  width: 100%;
+  margin-bottom: 1rem;
+  padding: 0.75rem;
   border: 1px solid #ccc;
-  font-size: 16px;
-  box-sizing: border-box;
+  border-radius: 4px;
+  font-size: 1rem;
 }
 
-button {
-  background-color: #ff9f43;
-  color: #fff;
+.auth-container button {
+  width: 100%;
+  padding: 0.75rem;
+  margin-top: 0.5rem;
+  background-color: #ff6600;
   border: none;
-  cursor: pointer;
+  color: white;
+  border-radius: 4px;
   font-weight: bold;
-  transition: background-color 0.2s ease;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
 }
 
-button:hover {
-  background-color: #ff851a;
+.auth-container button:hover {
+  background-color: #e65c00;
 }
 
-@media (max-width: 480px) {
-  body {
-    padding: 10px;
-  }
-  input, select, textarea, button {
-    font-size: 15px;
-    padding: 10px;
-  }
+.auth-container a {
+  display: block;
+  text-align: center;
+  margin-top: 0.75rem;
+  color: #ff6600;
+  font-size: 0.9rem;
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.auth-container a:hover {
+  color: #cc5200;
+}
+
+/* Dashboard button (logout button) styling */
+#logout-button {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  padding: 0.5rem 1rem;
+  background-color: #ff6600;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+#logout-button:hover {
+  background-color: #e65c00;
+}
+
+/* General container for dashboard content */
+.dashboard-container {
+  padding: 2rem;
 }
