@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chef Post Generator - Login</title>
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <div class="auth-container">
+    <!-- Sign In Form -->
+    <div id="signin-form">
+      <h2>Sign In</h2>
+      <input type="email" id="login-email" placeholder="Email">
+      <input type="password" id="login-password" placeholder="Password">
+      <button id="login-button">Login</button>
+      <p><a href="#" id="go-signup">Don't have an account? Sign up</a></p>
+      <p><a href="#" id="go-reset">Forgot Password?</a></p>
+    </div>
+
+    <!-- Sign Up Form -->
+    <div id="signup-form" style="display:none;">
+      <h2>Sign Up</h2>
+      <input type="text" id="signup-name" placeholder="Full Name">
+      <input type="email" id="signup-email" placeholder="Email">
+      <input type="text" id="signup-phone" placeholder="Phone Number">
+      <input type="password" id="signup-password" placeholder="Password">
+      <button id="signup-button">Sign Up</button>
+      <p><a href="#" id="go-login">Already have an account? Sign in</a></p>
+    </div>
+
+    <!-- Password Reset Form -->
+    <div id="reset-form" style="display:none;">
+      <h2>Reset Password</h2>
+      <input type="email" id="reset-email" placeholder="Email">
+      <button id="reset-button">Send Reset Email</button>
+      <p><a href="#" id="go-login-2">Back to Sign In</a></p>
+    </div>
+  </div>
+
+  <script type="module" src="./firebase.js"></script>
+  <script type="module" src="./auth.js"></script>
+</body>
+</html>
