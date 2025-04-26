@@ -1,90 +1,71 @@
+import { initializeApp, cert } from "firebase-admin/app";
+import { getFirestore } from "firebase-admin/firestore";
+import { Configuration, OpenAIApi } from "openai";
+
+if (!global._firebaseAdmin) {
+  initializeApp();
+  global._firebaseAdmin = true;
+}
+
+const db = getFirestore();
+
+const configuration = new Configuration({
+  apiKey: process.env.OPENAI_API_KEY,
+});
+const openai = new OpenAIApi(configuration);
+
 export default async function handler(req, res) {
-  try {
-    const {
-      type, clientName, eventDate, location,
-      menu, additionalInfo, industry, eventType, keywords
-    } = req.body;
+  if (req.method !== "POST") return res.status(405).end("Method Not Allowed");
 
-    if (!type || !clientName || !eventDate || !location || !menu) {
-      return res.status(400).json({ error: "Missing required fields" });
-    }
+  const {
+    type, clientName, eventDate, location, menu,
+    additionalInfo, keywords, industry, eventType, uid
+  } = req.body;
 
-    const keywordList = keywords
-      ? keywords.split(',').map(k => k.trim()).filter(k => k)
-      : [];
+  if (!uid) return res.status(400).json({ error: "No UID" });
 
-    const keywordBlogInstruction = keywordList.length
-      ? `If generating a blog post, make sure every keyword below appears at least once and is used naturally: ${keywordList.join(', ')}.`
-      : '';
+  const userRef = db.collection("users").doc(uid);
+  const userDoc = await userRef.get();
+  if (!userDoc.exists) return res.status(404).json({ error: "User not found" });
 
-    const keywordFBInstruction = keywordList.length
-      ? `Include all of the following keywords at least once in the Facebook post: ${keywordList.join(', ')}.`
-      : '';
+  const userData = userDoc.data();
+  const isPro = userData.status === "pro";
+  const tokensUsed = userData.tokensUsed || 0;
+  const tokenLimit = userData.tokenLimit || 20;
+  const cost = type === "full" ? 1 : 0.33;
 
-    const keywordIGInstruction = keywordList.length
-      ? `Convert the following keywords into hashtags and include them at the end of the Instagram caption: ${keywordList.join(', ')}.`
-      : '';
-
-    const typeSuffix = eventType && eventType.toLowerCase() !== "none"
-      ? ` It was a ${eventType.toLowerCase()} event.`
-      : "";
-
-    const industryLine = industry && industry.toLowerCase() !== "none"
-      ? ` This was part of a ${industry.toLowerCase()} engagement.`
-      : "";
-
-    const templates = {
-      blog: `# ${eventType && eventType !== "none" ? eventType + " for " : ""}${clientName} in ${location}
-
-Write a blog post recapping a private chef event that has already occurred for ${clientName} on ${eventDate} in ${location}.
-${industryLine}${typeSuffix}
-The menu included: ${menu}.
-Additional context: ${additionalInfo}.
-${keywordBlogInstruction}
-Avoid discussing future bookings or guest personal details.
-The post must be a minimum of 1000 words, elegant in tone, and structured in 8 or more distinct paragraphs.`,
-
-      instagram: `Write an Instagram caption recapping a private chef event on ${eventDate} in ${location} for ${clientName}.
-The menu featured: ${menu}.
-Event details: ${additionalInfo}.${typeSuffix}${industryLine}
-Avoid offering bookings or calls to action. Use elegant emojis. Speak in the past tense. ${keywordIGInstruction}`,
-
-      facebook: `Write a Facebook post summarizing a private chef event that took place for ${clientName} on ${eventDate} in ${location}.
-The food included: ${menu}.
-Event info: ${additionalInfo}.${typeSuffix}${industryLine}
-${keywordFBInstruction}
-Do not include a call to book or fictional guest commentary. Speak in the past tense.`
-    };
-
-    const prompt = templates[type];
-    if (!prompt) {
-      return res.status(400).json({ error: `Invalid post type: ${type}` });
-    }
-
-    const response = await fetch("https://api.openai.com/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${process.env.OPENAI_API_KEY}`,
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        model: "gpt-3.5-turbo",
-        messages: [{ role: "user", content: prompt }],
-        temperature: 0.7
-      })
-    });
-
-    if (!response.ok) {
-      const errText = await response.text();
-      console.error("OpenAI error:", errText);
-      return res.status(500).json({ error: "OpenAI API call failed", details: errText });
-    }
-
-    const data = await response.json();
-    return res.status(200).json({ result: data.choices[0].message.content.trim() });
-
-  } catch (err) {
-    console.error("API Handler error:", err);
-    res.status(500).json({ error: "Internal Server Error", message: err.message });
+  if (!isPro && tokensUsed + cost > tokenLimit) {
+    return res.status(403).json({ error: "Out of tokens" });
   }
+
+  const context = `Event for ${clientName} on ${eventDate} in ${location}.\nMenu: ${menu}\n${additionalInfo || ""}\n${keywords ? `Keywords: ${keywords}` : ""}\n${industry ? `Industry: ${industry}` : ""}\n${eventType ? `Event Type: ${eventType}` : ""}`;
+
+  const promptBase = `Write a recap of a private chef event that already happened. Do not invite readers. Highlight the food, experience, and tone.`;
+
+  const postTypes = {
+    blog: `${promptBase}\n\nFormat as a blog post. Minimum 1000 words. Title at top. Include ${keywords} in bold if applicable.\nContext: ${context}`,
+    instagram: `${promptBase}\n\nFormat as an Instagram caption with relevant hashtags.\nContext: ${context}`,
+    facebook: `${promptBase}\n\nFormat as a Facebook post that could be shared on a catering business page.\nContext: ${context}`,
+  };
+
+  const toGenerate = type === "full" ? ["blog", "instagram", "facebook"] : [type];
+
+  const responses = {};
+  for (const postType of toGenerate) {
+    const completion = await openai.createChatCompletion({
+      model: "gpt-4",
+      messages: [{ role: "user", content: postTypes[postType] }],
+      temperature: 0.8,
+      max_tokens: 1200,
+    });
+    responses[postType] = completion.data.choices[0].message.content;
+  }
+
+  if (!isPro) {
+    await userRef.update({
+      tokensUsed: tokensUsed + cost,
+    });
+  }
+
+  return res.status(200).json(responses);
 }
