@@ -40,7 +40,7 @@ document.getElementById('login-button').addEventListener('click', async () => {
   }
   try {
     await signInWithEmailAndPassword(auth, email, password);
-    window.location.href = '/index.html';
+    window.location.href = '/dashboard.html';
   } catch (error) {
     alert(error.message);
   }
@@ -58,7 +58,7 @@ document.getElementById('signup-button').addEventListener('click', async () => {
   }
   try {
     await createUserWithEmailAndPassword(auth, email, password);
-    window.location.href = '/index.html';
+    window.location.href = '/dashboard.html';
   } catch (error) {
     alert(error.message);
   }
@@ -84,6 +84,6 @@ document.getElementById('reset-button').addEventListener('click', async () => {
 // Auto redirect if already logged in
 onAuthStateChanged(auth, (user) => {
   if (user) {
-    window.location.href = '/index.html';
+    window.location.href = '/dashboard.html';
   }
 });

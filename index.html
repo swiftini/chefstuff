@@ -1,80 +1,44 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Private Chef Post Generator</title>
-  <link rel="stylesheet" href="styles.css" />
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-  <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-  <script type="module" src="script.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chef Post Generator - Login</title>
+  <link rel="stylesheet" href="./styles.css">
 </head>
 <body>
-  <div id="app" style="display: none;">
-    <h1>Private Chef Post Generator</h1>
-    <div id="auth-section">
-      <p id="user-email"></p>
-      <button onclick="logout()">Log out</button>
+  <div class="auth-container">
+    <!-- Sign In Form -->
+    <div id="signin-form">
+      <h2>Sign In</h2>
+      <input type="email" id="login-email" placeholder="Email">
+      <input type="password" id="login-password" placeholder="Password">
+      <button id="login-button">Login</button>
+      <p><a href="#" id="go-signup">Don't have an account? Sign up</a></p>
+      <p><a href="#" id="go-reset">Forgot Password?</a></p>
     </div>
-    <div id="usage-info"></div>
-    <div id="form-container">
-      <form id="generationForm">
-        <input type="text" id="clientName" placeholder="Client Name *" required />
-        <input type="text" id="eventDate" placeholder="Event Date *" required />
-        <input type="text" id="location" placeholder="Location *" required />
-        <textarea id="menu" placeholder="Menu *" required></textarea>
-        <textarea id="additionalInfo" placeholder="Additional Info"></textarea>
-        <select id="industry">
-          <option value="">Select Industry</option>
-          <option value="Private Chef">Private Chef</option>
-          <option value="Catering">Catering</option>
-        </select>
-        <select id="eventType">
-          <option value="">Select Event Type</option>
-          <option value="Banquet">Banquet</option>
-          <option value="Bar Mitzvah">Bar Mitzvah</option>
-          <option value="Bat Mitzvah">Bat Mitzvah</option>
-          <option value="Birthday">Birthday</option>
-          <option value="Brunch">Brunch</option>
-          <option value="Breakfast">Breakfast</option>
-          <option value="Dinner">Dinner</option>
-          <option value="Gala">Gala</option>
-          <option value="Holiday Party">Holiday Party</option>
-          <option value="Luncheon">Luncheon</option>
-          <option value="Wedding">Wedding</option>
-          <option value="Yacht Party">Yacht Party</option>
-        </select>
-        <textarea id="keywords" placeholder="Keywords (comma-separated)"></textarea>
-        <button type="submit">Generate All Posts</button>
-      </form>
+
+    <!-- Sign Up Form -->
+    <div id="signup-form" style="display:none;">
+      <h2>Sign Up</h2>
+      <input type="text" id="signup-name" placeholder="Full Name">
+      <input type="email" id="signup-email" placeholder="Email">
+      <input type="text" id="signup-phone" placeholder="Phone Number">
+      <input type="password" id="signup-password" placeholder="Password">
+      <button id="signup-button">Sign Up</button>
+      <p><a href="#" id="go-login">Already have an account? Sign in</a></p>
     </div>
-    <div id="output-section" style="display: none;">
-      <div class="output-block">
-        <h2>Blog</h2>
-        <pre id="blogOutput"></pre>
-        <button onclick="copyToClipboard('blogOutput')">Copy Blog</button>
-        <button onclick="regenerate('blog')">Regenerate Blog</button>
-      </div>
-      <div class="output-block">
-        <h2>Instagram</h2>
-        <pre id="igOutput"></pre>
-        <button onclick="copyToClipboard('igOutput')">Copy Instagram</button>
-        <button onclick="regenerate('instagram')">Regenerate Instagram</button>
-      </div>
-      <div class="output-block">
-        <h2>Facebook</h2>
-        <pre id="fbOutput"></pre>
-        <button onclick="copyToClipboard('fbOutput')">Copy Facebook</button>
-        <button onclick="regenerate('facebook')">Regenerate Facebook</button>
-      </div>
-    </div>
-    <div id="upgrade-section" style="display: none;">
-      <p>You’ve used all your tokens.</p>
-      <button onclick="upgradeToPro()">Upgrade to Pro ($9.99/mo)</button>
+
+    <!-- Password Reset Form -->
+    <div id="reset-form" style="display:none;">
+      <h2>Reset Password</h2>
+      <input type="email" id="reset-email" placeholder="Email">
+      <button id="reset-button">Send Reset Email</button>
+      <p><a href="#" id="go-login-2">Back to Sign In</a></p>
     </div>
   </div>
-  <script>
-    flatpickr("#eventDate", { dateFormat: "Y-m-d" });
-  </script>
+
+  <script type="module" src="./firebase.js"></script>
+  <script type="module" src="./auth.js"></script>
 </body>
 </html>
