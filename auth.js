@@ -1,15 +1,12 @@
 
-import { auth } from './firebase.js';
-import { createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail, onAuthStateChanged } from "firebase/auth";
+import { auth, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail, onAuthStateChanged } from './firebase.js';
 
-// FORCE the signin form to be visible on page load
 window.addEventListener('DOMContentLoaded', () => {
   document.getElementById('signin-form').style.display = 'block';
   document.getElementById('signup-form').style.display = 'none';
   document.getElementById('reset-form').style.display = 'none';
 });
 
-// Form switches
 document.getElementById('go-signup').addEventListener('click', () => {
   document.getElementById('signin-form').style.display = 'none';
   document.getElementById('signup-form').style.display = 'block';
@@ -30,7 +27,6 @@ document.getElementById('go-login-2').addEventListener('click', () => {
   document.getElementById('signin-form').style.display = 'block';
 });
 
-// Login
 document.getElementById('login-button').addEventListener('click', async () => {
   const email = document.getElementById('login-email').value.trim();
   const password = document.getElementById('login-password').value.trim();
@@ -46,7 +42,6 @@ document.getElementById('login-button').addEventListener('click', async () => {
   }
 });
 
-// Signup
 document.getElementById('signup-button').addEventListener('click', async () => {
   const email = document.getElementById('signup-email').value.trim();
   const password = document.getElementById('signup-password').value.trim();
@@ -64,7 +59,6 @@ document.getElementById('signup-button').addEventListener('click', async () => {
   }
 });
 
-// Password Reset
 document.getElementById('reset-button').addEventListener('click', async () => {
   const email = document.getElementById('reset-email').value.trim();
   if (!email) {
@@ -81,9 +75,8 @@ document.getElementById('reset-button').addEventListener('click', async () => {
   }
 });
 
-// Auto redirect if already logged in
 onAuthStateChanged(auth, (user) => {
-  if (user) {
+  if (user && window.location.pathname === '/index.html') {
     window.location.href = '/dashboard.html';
   }
 });
