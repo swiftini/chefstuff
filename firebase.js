@@ -4,12 +4,12 @@ import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, se
 import { getFirestore } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
 
 const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_AUTH_DOMAIN",
-  projectId: "YOUR_PROJECT_ID",
-  storageBucket: "YOUR_STORAGE_BUCKET",
-  messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-  appId: "YOUR_APP_ID"
+  apiKey: "AIzaSyBXjQlt_W_Oj0BnL4GbYUc78jSPAJlqN0Q",
+  authDomain: "chefstuff-7c2af.firebaseapp.com",
+  projectId: "chefstuff-7c2af",
+  storageBucket: "chefstuff-7c2af.firebasestorage.app",
+  messagingSenderId: "846509548380",
+  appId: "1:846509548380:web:8c1905fbbc8ac6ed179799"
 };
 
 const app = initializeApp(firebaseConfig);
